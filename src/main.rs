@@ -1,14 +1,19 @@
 extern crate reqwest;
 
 use serialport::prelude::*;
+use std::env;
 use std::io::{self, Write};
+use std::str;
 use std::time::Duration;
 
 fn main() {
+  let args: Vec<String> = env::args().collect();
+  let port_name = &args[1];
+  let snack_url = &args[2];
+
   let mut settings: SerialPortSettings = Default::default();
   settings.timeout = Duration::from_millis(10);
 
-  let port_name = "/dev/ttyACM0";
   let baud_rate = 9600;
   settings.baud_rate = baud_rate;
   match serialport::open_with_settings(&port_name, &settings) {
@@ -19,10 +24,10 @@ fn main() {
         match port.read(serial_buf.as_mut_slice()) {
           Ok(t) => {
             io::stdout().write_all(&serial_buf[..t]).unwrap();
-            match std::str::from_utf8(&serial_buf) {
+            match str::from_utf8(&serial_buf) {
               Ok(t) => {
                 if t.starts_with("1") {
-                  hit_snack();
+                  hit_snack(snack_url);
                 }
               }
               Err(e) => eprintln!("error parsing UTF string: {:?}", e),
@@ -40,9 +45,9 @@ fn main() {
   }
 }
 
-fn hit_snack() {
+fn hit_snack(snack_url: &String) {
   println!("Hitting snack");
-  match reqwest::get("http://localhost:9002") {
+  match reqwest::get(snack_url) {
     Ok(_t) => println!("Hit snack!"),
     Err(e) => eprintln!("error hitting snack: {:?}", e),
   }
