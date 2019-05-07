@@ -15,7 +15,17 @@ fn main() {
             println!("Receiving data on {} at {} baud:", &port_name, &baud_rate);
             loop {
                 match port.read(serial_buf.as_mut_slice()) {
-                    Ok(t) => io::stdout().write_all(&serial_buf[..t]).unwrap(),
+                    Ok(t) => {
+                        io::stdout().write_all(&serial_buf[..t]).unwrap();
+                        match std::str::from_utf8(&serial_buf) {
+                            Ok(t) => {
+                                if t.starts_with("1") {
+                                    hit_snack();
+                                }
+                            }
+                            Err(e) => eprintln!("error parsing UTF string: {:?}", e),
+                        }
+                    }
                     Err(ref e) if e.kind() == io::ErrorKind::TimedOut => (),
                     Err(e) => eprintln!("{:?}", e),
                 }
@@ -26,4 +36,8 @@ fn main() {
             ::std::process::exit(1);
         }
     }
+}
+
+fn hit_snack() {
+    println!("Hitting snack!");
 }
