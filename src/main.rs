@@ -5,6 +5,7 @@ use std::env;
 use std::io::{self, Write};
 use std::str;
 use std::time::Duration;
+use std::error::Error;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -45,10 +46,27 @@ fn main() {
   }
 }
 
-fn hit_snack(snack_url: &String) {
+fn hit_snack(snack_url: &str) {
   println!("Hitting snack");
   match reqwest::get(snack_url) {
     Ok(_t) => println!("Hit snack!"),
     Err(e) => eprintln!("error hitting snack: {:?}", e),
   }
+}
+
+trait Change {
+  fn cause(&self) -> Box<Error>;
+  fn revert(&self) -> Box<Error>;
+}
+
+fn break_vigoda(old: &str) -> String {
+  return str::replace(old, "time := \"10:00am\"", "time := \"10:00")
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
 }
