@@ -5,9 +5,14 @@ use std::env;
 use std::io::{self, Write};
 use std::str;
 use std::time::Duration;
+use std::process;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
+  if args.len() != 3 {
+    println!("kubotton must takes two arguments: kubutton <path/to/serial/port> <http://url/to/hit/when/pressed>");
+    process::exit(1);
+  }
   let port_name = &args[1];
   let snack_url = &args[2];
 
