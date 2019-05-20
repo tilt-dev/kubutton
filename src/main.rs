@@ -2,14 +2,16 @@ extern crate reqwest;
 
 use serialport::prelude::*;
 use std::env;
+use std::fs;
+use std::fs::File;
 use std::io::{self, Write};
+use std::path::Path;
 use std::str;
 use std::time::Duration;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
   let port_name = &args[1];
-  let snack_url = &args[2];
 
   let mut settings: SerialPortSettings = Default::default();
   settings.timeout = Duration::from_millis(10);
@@ -27,7 +29,7 @@ fn main() {
             match str::from_utf8(&serial_buf) {
               Ok(t) => {
                 if t.starts_with("1") {
-                  hit_snack(snack_url);
+                  create_or_delete_file();
                 }
               }
               Err(e) => eprintln!("error parsing UTF string: {:?}", e),
@@ -45,10 +47,21 @@ fn main() {
   }
 }
 
-fn hit_snack(snack_url: &String) {
-  println!("Hitting snack");
-  match reqwest::get(snack_url) {
-    Ok(_t) => println!("Hit snack!"),
-    Err(e) => eprintln!("error hitting snack: {:?}", e),
+fn create_or_delete_file() {
+  println!("Checking if file /tmp/tiltcrasher exists");
+  let p = Path::new("/tmp/tiltcrasher");
+
+  if p.exists() {
+    println!("It exists. Deleting it.");
+    match fs::remove_file(p) {
+      Ok(_) => println!("Deleted file"),
+      Err(e) => eprintln!("{:?}", e),
+    }
+  } else {
+    println!("It does not exist. Creating it.");
+    match File::create(p) {
+      Ok(_) => println!("Created file"),
+      Err(e) => eprintln!("{:?}", e),
+    }
   }
 }
