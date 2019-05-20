@@ -1,5 +1,3 @@
-extern crate reqwest;
-
 use serialport::prelude::*;
 use std::env;
 use std::fs;
@@ -12,6 +10,7 @@ use std::time::Duration;
 fn main() {
   let args: Vec<String> = env::args().collect();
   let port_name = &args[1];
+  let file_name = &args[1];
 
   let mut settings: SerialPortSettings = Default::default();
   settings.timeout = Duration::from_millis(10);
@@ -29,7 +28,7 @@ fn main() {
             match str::from_utf8(&serial_buf) {
               Ok(t) => {
                 if t.starts_with("1") {
-                  create_or_delete_file();
+                  create_or_delete_file(file_name);
                 }
               }
               Err(e) => eprintln!("error parsing UTF string: {:?}", e),
@@ -47,9 +46,9 @@ fn main() {
   }
 }
 
-fn create_or_delete_file() {
-  println!("Checking if file /tmp/tiltcrasher exists");
-  let p = Path::new("/tmp/tiltcrasher");
+fn create_or_delete_file(file_name: &String) {
+  println!("Checking if file exists");
+  let p = Path::new(file_name);
 
   if p.exists() {
     println!("It exists. Deleting it.");
