@@ -10,7 +10,7 @@ use std::time::Duration;
 fn main() {
   let args: Vec<String> = env::args().collect();
   let port_name = &args[1];
-  let file_name = &args[1];
+  let file_name = &args[2];
 
   let mut settings: SerialPortSettings = Default::default();
   settings.timeout = Duration::from_millis(10);
